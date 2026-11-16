@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TimeTable Pro | Class Scheduler</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+
+  <main class="app">
+    <header class="top">
+      <div>
+        <p class="eyebrow">DAILY PLANNER</p>
+        <h1>TimeTable <span>Pro</span></h1>
+      </div>
+      <div class="clock">
+        <div id="liveTime">--:--:--</div>
+        <div id="liveDate">---</div>
+      </div>
+    </header>
+
+    <section class="hero glass" id="nextCard">
+      <p class="eyebrow">NEXT UP</p>
+      <h2 id="nextName">No upcoming class</h2>
+      <p id="nextMeta">Add a class to get started</p>
+      <div class="count" id="nextCount"></div>
+    </section>
+
+    <section class="grid">
+      <div class="glass">
+        <div class="nav">
+          <button id="prev" aria-label="Previous day">&#8249;</button>
+          <div class="nav-mid">
+            <strong id="dayLabel">Today</strong>
+            <small id="dayFull"></small>
+          </div>
+          <button id="next" aria-label="Next day">&#8250;</button>
+          <button id="today" class="ghost">Today</button>
+        </div>
+        <ul id="list" class="list"></ul>
+      </div>
+
+      <form id="form" class="glass form">
+        <h3>New class</h3>
+        <label>Class name
+          <input id="name" required placeholder="Data Structures">
+        </label>
+        <label>Room
+          <input id="room" required placeholder="Lab 3">
+        </label>
+        <label>Date
+          <input id="date" type="date" required>
+        </label>
+        <div class="two">
+          <label>Start
+            <input id="start" type="time" required>
+          </label>
+          <label>End
+            <input id="end" type="time" required>
+          </label>
+        </div>
+        <button class="primary" type="submit">Add to schedule</button>
+        <p id="toast" class="toast"></p>
+      </form>
+    </section>
+
+    <p class="foot">Updates every second &bull; Open with VS Code Live Server (ES6 modules)</p>
+  </main>
+
+  <script type="module" src="main.js"></script>
+</body>
+</html>
