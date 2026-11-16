@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TechSpark Workshops | Ticket Booking</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root { --ink:#0f2a43; --blue:#0077ff; --mint:#00c9a7; --bg:#eef5fb; --line:#d6e2ee; --mut:#62788d; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; display: flex; justify-content: center; padding: 30px 14px; }
+  .shell { width: 100%; max-width: 760px; }
+  .brand { text-align: center; margin-bottom: 18px; }
+  .brand h1 { font-size: 1.9rem; }
+  .brand h1 span { color: var(--blue); }
+  .brand p { color: var(--mut); }
+
+  .steps { display: flex; justify-content: space-between; margin-bottom: 18px; position: relative; }
+  .steps::before { content: ''; position: absolute; top: 16px; left: 8%; right: 8%; height: 3px; background: var(--line); }
+  .step { position: relative; z-index: 1; text-align: center; flex: 1; font-size: .78rem; color: var(--mut); }
+  .step i { display: grid; place-items: center; width: 34px; height: 34px; margin: 0 auto 6px; border-radius: 50%; background: #fff; border: 3px solid var(--line); font-style: normal; font-weight: 700; }
+  .step.on i { border-color: var(--blue); color: var(--blue); }
+  .step.done i { background: var(--mint); border-color: var(--mint); color: #fff; }
+
+  .card { background: #fff; border-radius: 18px; padding: 28px; box-shadow: 0 12px 40px rgba(15,42,67,.1); }
+  .pane { display: none; }
+  .pane.show { display: block; animation: in .3s; }
+  @keyframes in { from { opacity: 0; transform: translateX(14px); } }
+  h2 { font-size: 1.15rem; margin-bottom: 16px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .f { margin-bottom: 14px; }
+  .f label { display: block; font-size: .82rem; font-weight: 600; margin-bottom: 5px; }
+  input, select, textarea { width: 100%; font: inherit; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: #fafcfe; }
+  input:focus, select:focus, textarea:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(0,119,255,.15); }
+  input.bad, select.bad { border-color: #e5484d; }
+  .err { color: #e5484d; font-size: .75rem; min-height: 1em; display: block; margin-top: 3px; }
+
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .cards input { display: none; }
+  .opt { display: block; padding: 16px 10px; text-align: center; border: 2px solid var(--line); border-radius: 14px; cursor: pointer; font-weight: 600; }
+  .opt small { display: block; color: var(--mut); font-weight: 400; margin-top: 4px; }
+  .cards input:checked + .opt { border-color: var(--blue); background: #eaf3ff; }
+
+  .counter { display: flex; align-items: center; gap: 14px; }
+  .counter button { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--blue); color: #fff; font-size: 1.3rem; cursor: pointer; }
+  .counter output { font-size: 1.3rem; font-weight: 700; min-width: 28px; text-align: center; }
+
+  .sum { background: #f3f8fd; border-radius: 12px; padding: 16px; font-size: .92rem; }
+  .sum div { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed var(--line); }
+  .sum div:last-child { border: 0; font-weight: 800; font-size: 1.1rem; color: var(--blue); }
+
+  .btns { display: flex; justify-content: space-between; margin-top: 20px; gap: 10px; }
+  .btn { padding: 12px 26px; border: 0; border-radius: 10px; font: inherit; font-weight: 700; cursor: pointer; }
+  .back { background: #e6eef6; color: var(--ink); }
+  .next { background: var(--blue); color: #fff; margin-left: auto; }
+  .book { background: linear-gradient(90deg, var(--blue), var(--mint)); color: #fff; margin-left: auto; }
+  .agree { display: flex; gap: 8px; align-items: center; margin-top: 14px; font-size: .88rem; }
+  .agree input { width: auto; }
+
+  #okBox { display: none; text-align: center; padding: 20px 0; }
+  #okBox .tick { width: 70px; height: 70px; border-radius: 50%; background: var(--mint); color: #fff; font-size: 2.2rem; display: grid; place-items: center; margin: 0 auto 14px; }
+  #okBox code { display: inline-block; background: #eaf3ff; padding: 6px 14px; border-radius: 8px; font-weight: 700; margin: 8px 0 16px; }
+
+  @media (max-width: 600px) { .row, .cards { grid-template-columns: 1fr; } .card { padding: 20px; } .step span { display: none; } }
+</style>
+</head>
+<body>
+<div class="shell">
+  <div class="brand"><h1>Tech<span>Spark</span> Workshops</h1><p>Book your seat in 3 quick steps</p></div>
+
+  <div class="steps">
+    <div class="step on" data-s="0"><i>1</i><span>Student</span></div>
+    <div class="step" data-s="1"><i>2</i><span>Workshop</span></div>
+    <div class="step" data-s="2"><i>3</i><span>Confirm</span></div>
+  </div>
+
+  <div class="card">
+    <form id="f" novalidate>
+      <section class="pane show">
+        <h2>Student details</h2>
+        <div class="row">
+          <div class="f"><label>Student name</label><input id="name"><span class="err"></span></div>
+          <div class="f"><label>PRN / Student ID</label><input id="prn"><span class="err"></span></div>
+        </div>
+        <div class="row">
+          <div class="f"><label>Email</label><input id="email" type="email"><span class="err"></span></div>
+          <div class="f"><label>Mobile number</label><input id="mobile" maxlength="10"><span class="err"></span></div>
+        </div>
+        <div class="f"><label>College name</label><input id="college" value="Symbiosis Institute of Technology, Nagpur"><span class="err"></span></div>
+        <div class="row">
+          <div class="f"><label>Branch</label>
+            <select id="branch"><option value="">Select</option><option>Computer Science</option><option>Information Technology</option><option>Electronics &amp; Telecom</option><option>Mechanical</option><option>Civil</option></select><span class="err"></span></div>
+          <div class="f"><label>Year of study</label>
+            <select id="year"><option value="">Select</option><option>First Year</option><option>Second Year</option><option>Third Year</option><option>Fourth Year</option></select><span class="err"></span></div>
+        </div>
+      </section>
+
+      <section class="pane">
+        <h2>Choose your workshop</h2>
+        <div class="cards f">
+          <div><input type="radio" name="wtype" id="w1" value="Artificial Intelligence|300"><label class="opt" for="w1">AI &amp; ML<small>Rs 300</small></label></div>
+          <div><input type="radio" name="wtype" id="w2" value="Web Development|250"><label class="opt" for="w2">Web Dev<small>Rs 250</small></label></div>
+          <div><input type="radio" name="wtype" id="w3" value="Cyber Security|350"><label class="opt" for="w3">Cyber Security<small>Rs 350</small></label></div>
+        </div>
+        <span class="err" id="wErr"></span>
+        <div class="row">
+          <div class="f"><label>Workshop date</label><input id="wdate" type="date"><span class="err"></span></div>
+          <div class="f"><label>Number of tickets</label>
+            <div class="counter"><button type="button" id="minus">-</button><output id="qty">1</output><button type="button" id="plus">+</button></div></div>
+        </div>
+        <div class="f"><label>Additional requirements</label><textarea id="extra" rows="3" placeholder="Laptop needed, dietary needs..."></textarea></div>
+      </section>
+
+      <section class="pane">
+        <h2>Review &amp; confirm</h2>
+        <div class="sum" id="sum"></div>
+        <label class="agree"><input type="checkbox" id="terms"> I agree to the terms and conditions</label>
+        <span class="err" id="tErr"></span>
+      </section>
+
+      <div class="btns">
+        <button type="button" class="btn back" id="back" style="visibility:hidden">Back</button>
+        <button type="button" class="btn next" id="next">Next</button>
+        <button type="submit" class="btn book" id="book" style="display:none">Book workshop ticket</button>
+      </div>
+    </form>
+
+    <div id="okBox">
+      <div class="tick">&#10003;</div>
+      <h2>Booking confirmed!</h2>
+      <code id="bid"></code>
+      <p style="color:var(--mut);margin-bottom:16px">Workshop ticket booking saved successfully.</p>
+      <button class="btn next" style="margin:0" onclick="location.reload()">Book another</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const panes = document.querySelectorAll('.pane');
+const stepEls = document.querySelectorAll('.step');
+let cur = 0, qty = 1;
+$('wdate').min = new Date().toISOString().split('T')[0];
+
+function mark(id, msg) {
+  const el = $(id); const sp = el.parentElement.querySelector('.err');
+  el.classList.toggle('bad', !!msg); if (sp) sp.textContent = msg; return !msg;
+}
+function check(step) {
+  let ok = true;
+  if (step === 0) {
+    ok = mark('name', $('name').value.trim().length < 3 ? 'Enter your name' : '') && ok;
+    ok = mark('prn', !$('prn').value.trim() ? 'PRN required' : '') && ok;
+    ok = mark('email', !/^\S+@\S+\.\S+$/.test($('email').value) ? 'Valid email required' : '') && ok;
+    ok = mark('mobile', !/^[6-9]\d{9}$/.test($('mobile').value) ? '10-digit mobile required' : '') && ok;
+    ok = mark('college', !$('college').value.trim() ? 'Required' : '') && ok;
+    ok = mark('branch', !$('branch').value ? 'Select branch' : '') && ok;
+    ok = mark('year', !$('year').value ? 'Select year' : '') && ok;
+  }
+  if (step === 1) {
+    const w = document.querySelector('input[name=wtype]:checked');
+    $('wErr').textContent = w ? '' : 'Pick a workshop'; ok = !!w && ok;
+    ok = mark('wdate', !$('wdate').value ? 'Pick a date' : '') && ok;
+  }
+  return ok;
+}
+function go(n) {
+  cur = n;
+  panes.forEach((p, i) => p.classList.toggle('show', i === n));
+  stepEls.forEach((s, i) => { s.classList.toggle('on', i === n); s.classList.toggle('done', i < n); });
+  $('back').style.visibility = n ? 'visible' : 'hidden';
+  $('next').style.display = n < 2 ? 'block' : 'none';
+  $('book').style.display = n === 2 ? 'block' : 'none';
+  if (n === 2) summary();
+}
+function summary() {
+  const [type, price] = document.querySelector('input[name=wtype]:checked').value.split('|');
+  $('sum').innerHTML = `
+    <div><span>Student</span><span>${$('name').value} (${$('prn').value})</span></div>
+    <div><span>Branch / Year</span><span>${$('branch').value}, ${$('year').value}</span></div>
+    <div><span>Contact</span><span>${$('email').value}</span></div>
+    <div><span>Workshop</span><span>${type}</span></div>
+    <div><span>Date</span><span>${$('wdate').value}</span></div>
+    <div><span>Tickets</span><span>${qty} x Rs ${price}</span></div>
+    <div><span>Total</span><span>Rs ${qty * price}</span></div>`;
+}
+$('next').onclick = () => { if (check(cur)) go(cur + 1); };
+$('back').onclick = () => go(cur - 1);
+$('plus').onclick = () => { if (qty < 10) $('qty').textContent = ++qty; };
+$('minus').onclick = () => { if (qty > 1) $('qty').textContent = --qty; };
+
+$('f').addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (!$('terms').checked) { $('tErr').textContent = 'Please accept the terms'; return; }
+  const [type, price] = document.querySelector('input[name=wtype]:checked').value.split('|');
+  const id = 'TS' + Date.now().toString().slice(-6);
+  const rec = { id, name: $('name').value, prn: $('prn').value, email: $('email').value, mobile: $('mobile').value,
+    college: $('college').value, branch: $('branch').value, year: $('year').value, workshop: type,
+    date: $('wdate').value, tickets: qty, total: qty * price, extra: $('extra').value };
+  const all = JSON.parse(localStorage.getItem('workshopBookings')) || [];
+  all.push(rec); localStorage.setItem('workshopBookings', JSON.stringify(all));
+  alert('Workshop ticket booking saved successfully!');
+  $('f').style.display = 'none'; $('okBox').style.display = 'block'; $('bid').textContent = 'Booking ID: ' + id;
+});
+</script>
+</body>
+</html>
